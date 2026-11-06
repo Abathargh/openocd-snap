@@ -64,6 +64,7 @@ parts:
       - libjaylink-dev
       - libcapstone-dev
       - libgpiod-dev
+      - patchelf
     stage-packages:
       - libgpiod2
       - libusb-1.0-0
@@ -96,6 +97,11 @@ parts:
     override-build: |
       ./bootstrap
       craftctl default
+      # Classic snaps get no LD_LIBRARY_PATH. DT_RPATH (not RUNPATH) is searched
+      # before LD_LIBRARY_PATH and for transitive deps, so bundled libs always win.
+      patchelf --force-rpath \
+        --set-rpath "\$ORIGIN/../lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR" \
+        "$CRAFT_PART_INSTALL/usr/bin/openocd"
       # GPL-2.0 requires shipping the license text with the binaries
       lic="$CRAFT_PART_INSTALL/usr/share/doc/openocd"
       mkdir -p "$lic"
