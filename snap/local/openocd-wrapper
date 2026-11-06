@@ -1,0 +1,15 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Add the script directories of installed components to OpenOCD's search path.
+set -e
+
+comp_root="${SNAP_COMPONENTS:-/snap/$SNAP_INSTANCE_NAME/components/$SNAP_REVISION}"
+
+extra=""
+for comp in stm32 renesas; do
+	dir="$comp_root/$comp/scripts"
+	[ -d "$dir" ] && extra="$extra -s $dir"
+done
+
+# shellcheck disable=SC2086
+exec "$SNAP/usr/bin/openocd" -s "$SNAP/usr/share/openocd/scripts" $extra "$@"

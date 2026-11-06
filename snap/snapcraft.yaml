@@ -1,0 +1,117 @@
+name: openocd
+base: core24
+adopt-info: openocd
+summary: OpenOCD with STMicroelectronics and Renesas enablement
+description: |
+  Upstream OpenOCD built with a small set of downstream vendor patches
+  (see patches/). All drivers are compiled into the binary; vendor target
+  and board scripts are shipped as optional components:
+
+    snap install openocd+stm32 openocd+renesas
+grade: stable
+confinement: strict
+license: GPL-2.0-or-later
+
+platforms:
+  amd64:
+  arm64:
+
+components:
+  stm32:
+    type: standard
+    summary: STMicroelectronics target/board scripts (STM32, BlueNRG, STEVAL...)
+    description: Target and board configuration scripts for STMicroelectronics devices.
+  renesas:
+    type: standard
+    summary: Renesas target/board scripts (RZ, R-Car, RA...)
+    description: Target and board configuration scripts for Renesas devices.
+
+apps:
+  openocd:
+    command: bin/openocd-wrapper
+    plugs:
+      - raw-usb
+      - serial-port
+      - network
+      - network-bind
+      - home
+      - removable-media
+
+parts:
+  wrapper:
+    plugin: dump
+    source: snap/local
+    organize:
+      openocd-wrapper: bin/openocd-wrapper
+
+  openocd:
+    plugin: autotools
+    source: https://github.com/openocd-org/openocd.git
+    # Pinned for both channels. To make edge follow upstream HEAD later, replace
+    # this line with `source-branch: master`; `scripts/openocd-snap.sh pin <ref>`
+    # re-pins (it checks that the patches still apply first).
+    source-commit: 84432339e4d72633b303227a8c74d0ef82664e5e
+    source-depth: 0
+    build-packages:
+      - git
+      - pkg-config
+      - libtool
+      - autoconf
+      - automake
+      - texinfo
+      - libusb-1.0-0-dev
+      - libhidapi-dev
+      - libftdi1-dev
+      - libjaylink-dev
+      - libcapstone-dev
+    stage-packages:
+      - libusb-1.0-0
+      - libhidapi-hidraw0
+      - libftdi1-2
+      - libjaylink0
+      - libcapstone4
+    autotools-configure-parameters:
+      - --prefix=/usr
+      - --enable-internal-jimtcl
+      - --enable-stlink
+      - --enable-ftdi
+      - --enable-jlink
+      - --enable-cmsis-dap
+      - --enable-cmsis-dap-v2
+      - --enable-ti-icdi
+      - --enable-usb-blaster
+      - --enable-openjtag
+      - --enable-sysfsgpio
+      - --disable-werror
+    override-pull: |
+      craftctl default
+      craftctl set version="$(git describe --tags --match 'v[0-9]*' --always)-vendor"
+      for p in "$CRAFT_PROJECT_DIR"/patches/stm/*.patch \
+               "$CRAFT_PROJECT_DIR"/patches/renesas/*.patch; do
+        echo "applying $p"
+        git apply --index "$p"
+      done
+    override-build: |
+      ./bootstrap
+      craftctl default
+      # GPL-2.0 requires shipping the license text with the binaries
+      lic="$CRAFT_PART_INSTALL/usr/share/doc/openocd"
+      mkdir -p "$lic"
+      cp COPYING "$lic/"
+      cp -r LICENSES "$lic/"
+    organize:
+      usr/share/openocd/scripts/target/stm32*: (component/stm32)/scripts/target/
+      usr/share/openocd/scripts/target/bluenrg*: (component/stm32)/scripts/target/
+      usr/share/openocd/scripts/target/stm8*: (component/stm32)/scripts/target/
+      usr/share/openocd/scripts/target/spear*: (component/stm32)/scripts/target/
+      usr/share/openocd/scripts/target/str*: (component/stm32)/scripts/target/
+      usr/share/openocd/scripts/board/st_*: (component/stm32)/scripts/board/
+      usr/share/openocd/scripts/board/stm32*: (component/stm32)/scripts/board/
+      usr/share/openocd/scripts/board/steval*: (component/stm32)/scripts/board/
+      usr/share/openocd/scripts/board/str9*: (component/stm32)/scripts/board/
+      usr/share/openocd/scripts/target/renesas_*: (component/renesas)/scripts/target/
+      usr/share/openocd/scripts/board/renesas_*: (component/renesas)/scripts/board/
+    prime:
+      # keep usr/share/doc: license texts and staged libraries' copyright files
+      - -usr/share/info
+      - -usr/share/man

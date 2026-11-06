@@ -1,0 +1,35 @@
+# Provenance of the carried patches. Keep in sync with patches/*/.
+# status: carried | upstreamed (drop at next bump) | superseded
+# tested_base: upstream commit the patch was last verified against.
+
+stm:
+  - file: 0001-tcl-add-STM32-target-board-configs-from-STMicroelect.patch
+    origin: STMicroelectronics/OpenOCD openocd-cubeide-r7 (ported)
+    status: carried
+    tested_base: 84432339e4d72633b303227a8c74d0ef82664e5e
+  - file: 0002-doc-document-STM32H5x-and-stldr-flash-drivers-from-S.patch
+    origin: STMicroelectronics/OpenOCD openocd-cubeide-r7 (ported)
+    status: carried
+    tested_base: 84432339e4d72633b303227a8c74d0ef82664e5e
+  - file: 0003-flash-add-stm32h5x-and-stldr-drivers-update-stm32l4x.patch
+    origin: STMicroelectronics/OpenOCD openocd-cubeide-r7 (ported; takes STM's stm32l4x, stm32h7x, bluenrg-x wholesale)
+    status: carried
+    tested_base: 84432339e4d72633b303227a8c74d0ef82664e5e
+
+renesas:
+  - file: 0001-target-aarch64-MRS-MSR-support-for-system-register-a.patch
+    origin: renesas-rz/rzg_openocd 0002-target-aarch64-MRS-MSR...
+    status: carried
+    tested_base: 84432339e4d72633b303227a8c74d0ef82664e5e
+  - file: 0002-target-aarch64-enable-disable-mmu-new-commands.patch
+    origin: renesas-rz/rzg_openocd 0003-...
+    status: carried
+    tested_base: 84432339e4d72633b303227a8c74d0ef82664e5e
+  - file: 0003-tcl-target-renesas_rz-add-hwthread-and-coreid.patch
+    origin: renesas-rz/rzg_openocd 0005-...
+    status: carried
+    tested_base: 84432339e4d72633b303227a8c74d0ef82664e5e
+
+# Not carried: Renesas 0001 (renesas_rz.cfg rename/V2L/G3S) and 0004 (icache invalidate) are
+# upstream; STM cortex_a, cache, watchpoint-API, target events and stlink changes conflict with
+# current upstream and are intentionally skipped.
