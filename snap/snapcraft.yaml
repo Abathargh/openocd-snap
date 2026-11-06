@@ -9,7 +9,7 @@ description: |
 
     snap install openocd+stm32 openocd+renesas
 grade: stable
-confinement: strict
+confinement: classic
 license: GPL-2.0-or-later
 
 platforms:
@@ -29,13 +29,6 @@ components:
 apps:
   openocd:
     command: bin/openocd-wrapper
-    plugs:
-      - raw-usb
-      - serial-port
-      - network
-      - network-bind
-      - home
-      - removable-media
 
 parts:
   wrapper:
@@ -43,6 +36,12 @@ parts:
     source: snap/local
     organize:
       openocd-wrapper: bin/openocd-wrapper
+
+  boards:
+    plugin: dump
+    source: boards
+    organize:
+      arduino_ventuno_q.cfg: (component/stm32)/scripts/board/arduino_ventuno_q.cfg
 
   openocd:
     plugin: autotools
@@ -64,7 +63,9 @@ parts:
       - libftdi1-dev
       - libjaylink-dev
       - libcapstone-dev
+      - libgpiod-dev
     stage-packages:
+      - libgpiod2
       - libusb-1.0-0
       - libhidapi-hidraw0
       - libftdi1-2
@@ -82,6 +83,7 @@ parts:
       - --enable-usb-blaster
       - --enable-openjtag
       - --enable-sysfsgpio
+      - --enable-linuxgpiod
       - --disable-werror
     override-pull: |
       craftctl default
