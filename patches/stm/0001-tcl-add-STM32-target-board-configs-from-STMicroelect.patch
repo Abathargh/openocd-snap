@@ -338,9 +338,9 @@ index 000000000..b9e67c604
 +
 +# like mrw, but with target selection
 +proc stm32h5x_mrw {used_target reg} {
-+	set value ""
-+	$used_target mem2array value 32 $reg 1
-+	return $value(0)
++	set value [$used_target read_memory $reg 32 1]
++	set value [lindex $value 0]
++	return $value
 +}
 +
 +# like mmw, but with target selection
