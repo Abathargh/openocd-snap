@@ -1,0 +1,29 @@
+name: Build snap
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: canonical/action-build@v1
+        id: snapcraft
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openocd-snap-${{ matrix.arch }}
+          path: |
+            ${{ steps.snapcraft.outputs.snap }}
+            *.comp
+          if-no-files-found: error
