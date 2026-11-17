@@ -42,6 +42,8 @@ parts:
     source: boards
     organize:
       arduino_ventuno_q.cfg: (component/stm32)/scripts/board/arduino_ventuno_q.cfg
+      arduino_ventuno_q_flash_bootloader.cfg: (component/stm32)/scripts/board/arduino_ventuno_q_flash_bootloader.cfg
+      arduino_ventuno_q_flash_sketch.cfg: (component/stm32)/scripts/board/arduino_ventuno_q_flash_sketch.cfg
 
   openocd:
     plugin: autotools
@@ -67,6 +69,7 @@ parts:
       - patchelf
     stage-packages:
       - libgpiod2
+      - gpiod  # gpioset, used by boards/arduino_ventuno_q.cfg to drive BOOT0
       - libusb-1.0-0
       - libhidapi-hidraw0
       - libftdi1-2
@@ -102,6 +105,9 @@ parts:
       patchelf --force-rpath \
         --set-rpath "\$ORIGIN/../lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR" \
         "$CRAFT_PART_INSTALL/usr/bin/openocd"
+      patchelf --force-rpath \
+        --set-rpath "\$ORIGIN/../lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR" \
+        "$CRAFT_PART_INSTALL/usr/bin/gpioset"
       # GPL-2.0 requires shipping the license text with the binaries
       lic="$CRAFT_PART_INSTALL/usr/share/doc/openocd"
       mkdir -p "$lic"

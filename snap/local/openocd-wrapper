@@ -11,5 +11,9 @@ for comp in stm32 renesas; do
 	[ -d "$dir" ] && extra="$extra -s $dir"
 done
 
+# board scripts run bundled tools (gpioset) through OpenOCD's exec
+PATH="$SNAP/usr/bin:$PATH"
+export PATH
+
 # shellcheck disable=SC2086
 exec "$SNAP/usr/bin/openocd" -s "$SNAP/usr/share/openocd/scripts" $extra "$@"
