@@ -1,0 +1,21 @@
+name: edge-patch-check
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+  push:
+    paths: ["patches/**", "snap/**", "scripts/**", "boards/**"]
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Do the vendor patches apply on upstream HEAD?
+        run: python3 scripts/openocd_snap.py check origin/master
+      - name: Have the Ventuno Q flash flows drifted from ArduinoCore-zephyr?
+        run: python3 scripts/openocd_snap.py flows
+      - name: Report distance from upstream
+        if: always()
+        run: python3 scripts/openocd_snap.py status
